@@ -2,6 +2,7 @@ import asyncio
 import ssl
 import logging
 import re
+import socket
 
 from .const import DOMAIN, MIN_SEVERITY_LEVELS
 
@@ -30,9 +31,17 @@ class SyslogServer:
 
         if protocol == "UDP":
             loop = asyncio.get_running_loop()
+            # Create a UDP socket with address reuse
+            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            try:
+                sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+            except OSError:
+                _LOGGER.debug("SO_REUSEPORT not available")
+            sock.bind((host, port))
             self.transport, _ = await loop.create_datagram_endpoint(
                 lambda: SyslogUDPProtocol(self),
-                local_addr=(host, port)
+                sock=sock
             )
             _LOGGER.debug("Started UDP syslog server on %s:%s", host, port)
         else:
@@ -52,7 +61,15 @@ class SyslogServer:
         message = data.decode(errors="ignore").strip()
         src_ip = addr[0]
 
-        if self.options.get("allowed_ips") and src_ip not in self.options["allowed_ips"]:
+        raw = self.options.get("allowed_ips") if "allowed_ips" in self.options else self.config.get("allowed_ips", "")
+        if isinstance(raw, str):
+            ips = [ip.strip() for ip in raw.split(",") if ip.strip()]
+        elif isinstance(raw, (list, tuple)):
+            ips = list(raw)
+        else:
+            ips = []
+
+        if ips and src_ip not in ips:
             return
 
         severity = None
@@ -60,7 +77,8 @@ class SyslogServer:
         if m:
             pri = int(m.group(1))
             severity = pri & 0x07
-            min_level = MIN_SEVERITY_LEVELS.get(self.options.get("min_severity", "info"), 6)
+            min_sev = self.options.get("min_severity", self.config.get("min_severity", "info"))
+            min_level = MIN_SEVERITY_LEVELS.get(min_sev, 6)
             if severity > min_level:
                 return
             body = m.group(2).strip()
@@ -96,9 +114,14 @@ class SyslogServer:
             writer.close()
             await writer.wait_closed()
 
-class SyslogUDPProtocol:
+class SyslogUDPProtocol(asyncio.DatagramProtocol):
     def __init__(self, server):
+        super().__init__()
         self.server = server
+
+    def connection_made(self, transport):
+        # Datagram transport is ready
+        pass
 
     def datagram_received(self, data, addr):
         self.server.process_message(data, addr)
