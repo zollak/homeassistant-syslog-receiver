@@ -9,3 +9,10 @@ async def async_setup(hass: HomeAssistant, config: dict):
     syslog = SyslogReceiver(hass)
     await syslog.start()
     return True
+
+async def async_unload(hass: HomeAssistant):
+    """Unload the syslog receiver and clean up resources."""
+    syslog = hass.data.get(DOMAIN)
+    if syslog:
+        await syslog.stop()  # Ensure we stop the server when unloading
+    return True

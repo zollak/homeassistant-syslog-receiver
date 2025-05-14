@@ -31,7 +31,16 @@ syslog_receiver:
   allowed_ips:
     - "192.168.1.10"  # IPs allowed to send syslog messages
   severity_level: 3   # Optional: Only process messages of this severity or higher
+  create_sensor: true  # Enable sensor creation (warning: could increase database size)
 ```
+
+#### Sensor Behavior
+
+- If `create_sensor` is `True`, each received syslog message will be stored as a sensor with the entity ID `sensor.syslog_receiver`. This will store the message in Home Assistant's state machine. Be aware that storing many messages in this way may increase the size of the database over time.
+
+- If `create_sensor` is `False`, the syslog message will only trigger events (`syslog_received`), but will not be stored in the state machine or the database.
+
+
 
 ### TLS Configuration
 

@@ -28,10 +28,6 @@ class SyslogReceiverConfigFlow(config_entries.ConfigFlow, domain="syslog_receive
             self._allowed_ips = user_input.get(CONF_ALLOWED_IPS, [])
             self._create_sensor = user_input.get(CONF_CREATE_SENSOR, False)
 
-            # Add a warning about creating a sensor (potential DB bloat)
-            if self._create_sensor:
-                _LOGGER.warning("Creating a sensor for syslog messages could fill your database with large amounts of data if many messages are received.")
-
             return self.async_create_entry(
                 title="Syslog Receiver",
                 data={
