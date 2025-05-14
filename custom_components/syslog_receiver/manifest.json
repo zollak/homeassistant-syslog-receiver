@@ -1,0 +1,8 @@
+{
+    "domain": "syslog_receiver",
+    "name": "Syslog Receiver",
+    "documentation": "https://github.com/zollak/homeassistant-syslog-receiver",
+    "dependencies": [],
+    "codeowners": ["@zollak"],
+    "version": "1.0.0"
+}
