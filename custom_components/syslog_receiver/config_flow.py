@@ -1,58 +1,29 @@
-import logging
+import voluptuous as vol
 from homeassistant import config_entries
-from homeassistant.const import CONF_HOST, CONF_PORT, CONF_USERNAME, CONF_PASSWORD, CONF_TLS, CONF_ALLOWED_IPS, CONF_CREATE_SENSOR
+from .const import (
+    DOMAIN, DEFAULT_HOST, DEFAULT_PORT, DEFAULT_PROTOCOL,
+    DEFAULT_USE_TLS, DEFAULT_ALLOWED_IPS, DEFAULT_MIN_SEVERITY, MIN_SEVERITY_LEVELS
+)
 
-_LOGGER = logging.getLogger(__name__)
+STEP_USER_DATA_SCHEMA = vol.Schema({
+    vol.Required("host", default=DEFAULT_HOST): str,
+    vol.Required("port", default=DEFAULT_PORT): int,
+    vol.Required("protocol", default=DEFAULT_PROTOCOL): vol.In(["UDP", "TCP"]),
+    vol.Required("use_tls", default=DEFAULT_USE_TLS): bool,
+    vol.Required("allowed_ips", default=DEFAULT_ALLOWED_IPS): [str],
+    vol.Required("min_severity", default=DEFAULT_MIN_SEVERITY): vol.In(list(MIN_SEVERITY_LEVELS.keys())),
+    vol.Required("enable_sensors", default=False): bool,
+})
 
-class SyslogReceiverConfigFlow(config_entries.ConfigFlow, domain="syslog_receiver"):
+class SyslogConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Syslog Receiver."""
 
-    def __init__(self):
-        """Initialize flow."""
-        self._host = None
-        self._port = 514
-        self._username = None
-        self._password = None
-        self._tls = False
-        self._allowed_ips = []
-        self._create_sensor = False
+    VERSION = 1
 
     async def async_step_user(self, user_input=None):
-        """Handle user input."""
+        errors = {}
         if user_input is not None:
-            self._host = user_input[CONF_HOST]
-            self._port = user_input[CONF_PORT]
-            self._username = user_input.get(CONF_USERNAME)
-            self._password = user_input.get(CONF_PASSWORD)
-            self._tls = user_input.get(CONF_TLS, False)
-            self._allowed_ips = user_input.get(CONF_ALLOWED_IPS, [])
-            self._create_sensor = user_input.get(CONF_CREATE_SENSOR, False)
-
-            return self.async_create_entry(
-                title="Syslog Receiver",
-                data={
-                    CONF_HOST: self._host,
-                    CONF_PORT: self._port,
-                    CONF_USERNAME: self._username,
-                    CONF_PASSWORD: self._password,
-                    CONF_TLS: self._tls,
-                    CONF_ALLOWED_IPS: self._allowed_ips,
-                    CONF_CREATE_SENSOR: self._create_sensor,
-                },
-            )
-
+            return self.async_create_entry(title="Syslog Receiver", data=user_input)
         return self.async_show_form(
-            step_id="user",
-            data_schema=self._get_user_input_schema(),
+            step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
         )
-
-    def _get_user_input_schema(self):
-        """Create the input schema with an option for the sensor."""
-        from homeassistant.core import HomeAssistant
-        return {
-            vol.Required(CONF_HOST, default="0.0.0.0"): str,
-            vol.Optional(CONF_PORT, default=514): int,
-            vol.Optional(CONF_TLS, default=False): bool,
-            vol.Optional(CONF_CREATE_SENSOR, default=False): bool,
-            vol.Optional(CONF_ALLOWED_IPS, default=[]): list,
-        }

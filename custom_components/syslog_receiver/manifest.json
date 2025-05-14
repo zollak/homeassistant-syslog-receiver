@@ -4,5 +4,5 @@
     "documentation": "https://github.com/zollak/homeassistant-syslog-receiver",
     "dependencies": [],
     "codeowners": ["@zollak"],
-    "version": "1.0.1"
+    "version": "1.0.3"
 }

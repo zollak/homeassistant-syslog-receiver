@@ -3,7 +3,6 @@ import socket
 import ssl
 import asyncio
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.event import async_track_time_interval
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -11,15 +10,35 @@ class SyslogReceiver:
     def __init__(self, hass: HomeAssistant):
         """Initialize the SyslogReceiver component."""
         self.hass = hass
-        self.host = hass.config_entries.async_entries("syslog_receiver")[0].data.get("host")
-        self.port = hass.config_entries.async_entries("syslog_receiver")[0].data.get("port", 514)
-        self.username = hass.config_entries.async_entries("syslog_receiver")[0].data.get("username")
-        self.password = hass.config_entries.async_entries("syslog_receiver")[0].data.get("password")
-        self.tls_enabled = hass.config_entries.async_entries("syslog_receiver")[0].data.get("tls", False)
-        self.allowed_ips = hass.config_entries.async_entries("syslog_receiver")[0].data.get("allowed_ips", [])
-        self.create_sensor = hass.config_entries.async_entries("syslog_receiver")[0].data.get("create_sensor", False)
+        self.host = None
+        self.port = 514
+        self.username = None
+        self.password = None
+        self.tls_enabled = False
+        self.allowed_ips = []
+        self.create_sensor = False
         self.server = None
         self.ssl_context = None
+
+        # Check if the integration is configured via UI (config_entries) or via configuration.yaml
+        if hass.config_entries.async_entries("syslog_receiver"):
+            # Get configuration from config_entries (UI-based setup)
+            entry = hass.config_entries.async_entries("syslog_receiver")[0]
+            self.host = entry.data.get("host")
+            self.port = entry.data.get("port", 514)
+            self.username = entry.data.get("username")
+            self.password = entry.data.get("password")
+            self.tls_enabled = entry.data.get("tls", False)
+            self.allowed_ips = entry.data.get("allowed_ips", [])
+            self.create_sensor = entry.data.get("create_sensor", False)
+        else:
+            # Get configuration from configuration.yaml (manual setup)
+            config = hass.data.get("syslog_receiver", {})
+            self.host = config.get("host")
+            self.port = config.get("port", 514)
+            self.tls_enabled = config.get("tls", False)
+            self.allowed_ips = config.get("allowed_ips", [])
+            self.create_sensor = config.get("create_sensor", False)
 
         if self.tls_enabled:
             self.ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
@@ -38,10 +57,10 @@ class SyslogReceiver:
                 ssl=self.ssl_context,
             )
         else:
-            # Use regular UDP socket (non-encrypted)
+            # Force binding to IPv4 (0.0.0.0)
             server = await loop.create_datagram_endpoint(
                 lambda: SyslogProtocol(self.hass, self.create_sensor),
-                local_addr=(self.host, self.port)
+                local_addr=("0.0.0.0", self.port)  # Ensure it's bound to IPv4
             )
         self.server = server
         _LOGGER.info(f"Syslog receiver started on {self.host}:{self.port}")
@@ -66,8 +85,14 @@ class SyslogProtocol(asyncio.DatagramProtocol):
 
     def datagram_received(self, data, addr):
         """Receive a syslog message."""
+        # Check if the integration is set up via config_entries (UI) or via configuration.yaml
+        if self.hass.config_entries.async_entries("syslog_receiver"):
+            allowed_ips = self.hass.config_entries.async_entries("syslog_receiver")[0].data.get("allowed_ips", [])
+        else:
+            allowed_ips = self.hass.data.get("syslog_receiver", {}).get("allowed_ips", [])
+
         # Check if the sender's IP is allowed
-        if addr[0] not in self.hass.config_entries.async_entries("syslog_receiver")[0].data.get("allowed_ips", []):
+        if addr[0] not in allowed_ips:
             _LOGGER.warning(f"Rejected syslog message from {addr[0]}")
             return  # Ignore message from non-allowed IP
 
@@ -75,18 +100,16 @@ class SyslogProtocol(asyncio.DatagramProtocol):
         message = data.decode("utf-8")
         severity = self.extract_severity(message)
 
+        if self.create_sensor:
+            # Create a sensor for the syslog message, even if the severity is low
+            self.hass.states.async_set("sensor.syslog_receiver", message)
+
         # Handle syslog message based on severity (only process critical or higher)
         if severity is not None and severity <= 3:  # Severity 0-3 are critical
             _LOGGER.info(f"Received critical syslog message: {message}")
-            if self.create_sensor:
-                # Optionally create a sensor to store the message
-                self.hass.states.async_set("sensor.syslog_receiver", message)
             self.hass.bus.fire("syslog_received", {"message": message, "severity": severity})
         else:
             _LOGGER.debug(f"Received syslog message: {message}")
-            if self.create_sensor:
-                # Optionally create a sensor to store the message
-                self.hass.states.async_set("sensor.syslog_receiver", message)
             self.hass.bus.fire("syslog_received", {"message": message, "severity": severity})
 
     def extract_severity(self, message):
