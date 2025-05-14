@@ -1,6 +1,6 @@
 import logging
 from homeassistant import config_entries
-from homeassistant.const import CONF_HOST, CONF_PORT, CONF_USERNAME, CONF_PASSWORD
+from homeassistant.const import CONF_HOST, CONF_PORT, CONF_USERNAME, CONF_PASSWORD, CONF_TLS, CONF_ALLOWED_IPS
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -13,6 +13,8 @@ class SyslogReceiverConfigFlow(config_entries.ConfigFlow, domain="syslog_receive
         self._port = 514
         self._username = None
         self._password = None
+        self._tls = False
+        self._allowed_ips = []
 
     async def async_step_user(self, user_input=None):
         """Handle user input."""
@@ -21,6 +23,8 @@ class SyslogReceiverConfigFlow(config_entries.ConfigFlow, domain="syslog_receive
             self._port = user_input[CONF_PORT]
             self._username = user_input.get(CONF_USERNAME)
             self._password = user_input.get(CONF_PASSWORD)
+            self._tls = user_input.get(CONF_TLS, False)
+            self._allowed_ips = user_input.get(CONF_ALLOWED_IPS, [])
 
             return self.async_create_entry(
                 title="Syslog Receiver",
@@ -29,6 +33,8 @@ class SyslogReceiverConfigFlow(config_entries.ConfigFlow, domain="syslog_receive
                     CONF_PORT: self._port,
                     CONF_USERNAME: self._username,
                     CONF_PASSWORD: self._password,
+                    CONF_TLS: self._tls,
+                    CONF_ALLOWED_IPS: self._allowed_ips,
                 },
             )
 
