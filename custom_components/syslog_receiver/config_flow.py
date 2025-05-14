@@ -1,6 +1,6 @@
 import logging
 from homeassistant import config_entries
-from homeassistant.const import CONF_HOST, CONF_PORT, CONF_USERNAME, CONF_PASSWORD, CONF_TLS, CONF_ALLOWED_IPS
+from homeassistant.const import CONF_HOST, CONF_PORT, CONF_USERNAME, CONF_PASSWORD, CONF_TLS, CONF_ALLOWED_IPS, CONF_CREATE_SENSOR
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -15,6 +15,7 @@ class SyslogReceiverConfigFlow(config_entries.ConfigFlow, domain="syslog_receive
         self._password = None
         self._tls = False
         self._allowed_ips = []
+        self._create_sensor = False
 
     async def async_step_user(self, user_input=None):
         """Handle user input."""
@@ -25,6 +26,11 @@ class SyslogReceiverConfigFlow(config_entries.ConfigFlow, domain="syslog_receive
             self._password = user_input.get(CONF_PASSWORD)
             self._tls = user_input.get(CONF_TLS, False)
             self._allowed_ips = user_input.get(CONF_ALLOWED_IPS, [])
+            self._create_sensor = user_input.get(CONF_CREATE_SENSOR, False)
+
+            # Add a warning about creating a sensor (potential DB bloat)
+            if self._create_sensor:
+                _LOGGER.warning("Creating a sensor for syslog messages could fill your database with large amounts of data if many messages are received.")
 
             return self.async_create_entry(
                 title="Syslog Receiver",
@@ -35,7 +41,22 @@ class SyslogReceiverConfigFlow(config_entries.ConfigFlow, domain="syslog_receive
                     CONF_PASSWORD: self._password,
                     CONF_TLS: self._tls,
                     CONF_ALLOWED_IPS: self._allowed_ips,
+                    CONF_CREATE_SENSOR: self._create_sensor,
                 },
             )
 
-        return self.async_show_form(step_id="user")
+        return self.async_show_form(
+            step_id="user",
+            data_schema=self._get_user_input_schema(),
+        )
+
+    def _get_user_input_schema(self):
+        """Create the input schema with an option for the sensor."""
+        from homeassistant.core import HomeAssistant
+        return {
+            vol.Required(CONF_HOST, default="0.0.0.0"): str,
+            vol.Optional(CONF_PORT, default=514): int,
+            vol.Optional(CONF_TLS, default=False): bool,
+            vol.Optional(CONF_CREATE_SENSOR, default=False): bool,
+            vol.Optional(CONF_ALLOWED_IPS, default=[]): list,
+        }
