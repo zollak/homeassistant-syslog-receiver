@@ -1,23 +1,23 @@
-from homeassistant.helpers.entity import Entity
+from homeassistant.components.sensor import SensorEntity
+from .const import DOMAIN
 
-class SyslogSensor(Entity):
-    """Representation of a Syslog Sensor."""
-
-    def __init__(self, message):
-        self._message = message
-        self._state = message
-
-    @property
-    def name(self):
-        """Return the name of the sensor."""
-        return "Syslog Receiver"
+class SyslogSensor(SensorEntity):
+    def __init__(self, server, entry_id):
+        self.server = server
+        self.entry_id = entry_id
+        self._attr_name = f"Syslog Receiver {entry_id}"
+        self._attr_unique_id = f"syslog_receiver_{entry_id}"
 
     @property
     def state(self):
-        """Return the current state."""
-        return self._state
+        return self.server.last_message
 
-    def update(self, message):
-        """Update the state."""
-        self._message = message
-        self._state = message
+    @property
+    def extra_state_attributes(self):
+        return {
+            "source_ip": self.server.last_source,
+            "severity": self.server.last_severity
+        }
+
+    async def async_added_to_hass(self):
+        self.server.sensors.append(self)

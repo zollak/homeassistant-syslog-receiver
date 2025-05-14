@@ -13,3 +13,13 @@
   
 ### Fixed
 - **Graceful server shutdown**: The `stop()` method is retained to ensure the syslog listener server is properly stopped when Home Assistant is unloaded or shut down. This method ensures the server is closed and resources are freed up.
+
+## [1.0.3] - 2025-05-14
+### Added
+- Initial release of Syslog Receiver integration
+- Support for UDP and TCP (with optional TLS) syslog input
+- Configurable source IP and severity filters
+- Event bus firing on received messages for automation triggers
+- Optional sensor entities for last received message
+- Full UI-based configuration and options flows
+- Debug and error logging for troubleshooting
