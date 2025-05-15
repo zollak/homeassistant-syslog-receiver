@@ -1,6 +1,8 @@
-# Syslog Receiver for Home Assistant
+# Syslog Receiver integration for Home Assisstant
 
-This Home Assistant component listens for incoming syslog messages over UDP, TCP, or TLS and can trigger automations via events or expose the messages via sensors.
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=zollak&repository=homeassistant-syslog-receiver&category=Integration)
+
+This is a custom integration for Home Assistant which listens for incoming syslog messages over UDP, TCP, or TLS and can trigger automations via events or expose the messages via sensors.
 
 ## Features
 
