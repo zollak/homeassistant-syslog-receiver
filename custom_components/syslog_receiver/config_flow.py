@@ -11,6 +11,8 @@ from .const import (
     DEFAULT_ALLOWED_IPS,
     DEFAULT_MIN_SEVERITY,
     DEFAULT_INSTANCE_NAME,
+    DEFAULT_CERTFILE,
+    DEFAULT_KEYFILE,
     MIN_SEVERITY_LEVELS,
 )
 
@@ -19,17 +21,18 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
         vol.Required("instance_name", default=DEFAULT_INSTANCE_NAME): str,
         vol.Required("host", default=DEFAULT_HOST): str,
         vol.Required("port", default=DEFAULT_PORT): int,
-        vol.Required("protocol", default=DEFAULT_PROTOCOL): vol.In(["UDP", "TCP"]),
+        vol.Required("protocol", default=DEFAULT_PROTOCOL): vol.In(("UDP", "TCP")),
         vol.Required("use_tls", default=DEFAULT_USE_TLS): bool,
-        vol.Optional("allowed_ips", default=DEFAULT_ALLOWED_IPS): str,  # comma-separated IPs
+        vol.Optional("certfile", default=DEFAULT_CERTFILE): cv.string,
+        vol.Optional("keyfile", default=DEFAULT_KEYFILE): cv.string,
+        vol.Required("allowed_ips", default=DEFAULT_ALLOWED_IPS): str,
         vol.Required("min_severity", default=DEFAULT_MIN_SEVERITY): vol.In(tuple(MIN_SEVERITY_LEVELS.keys())),
         vol.Required("enable_sensors", default=False): bool,
     }
 )
 
 class SyslogConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Handle a config flow for Syslog Receiver."""
-    VERSION = 2
+    VERSION = 3
 
     async def async_step_user(self, user_input=None):
         errors = {}
@@ -38,7 +41,9 @@ class SyslogConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 title=user_input["instance_name"], data=user_input
             )
         return self.async_show_form(
-            step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
+            step_id="user",
+            data_schema=STEP_USER_DATA_SCHEMA,
+            errors=errors
         )
 
     @staticmethod

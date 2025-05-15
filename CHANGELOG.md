@@ -37,3 +37,11 @@ First working version, but for 1 instance
  - Reworked the integration for multiple instances and per-device naming.
 
 You can now create one integration per device/protocol, name each entry (e.g. “NAS UDP” vs “Firewall TCP-TLS”), and have separate sensors.
+
+## [1.0.6] - 2025-05-15
+
+### Added
+- Detailed README for example configuration, storage considerations, etc.
+
+### Fixed
+- TLS feature has fixed. Extend with certificate handling.

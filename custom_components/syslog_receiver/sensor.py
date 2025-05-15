@@ -3,7 +3,6 @@ from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
@@ -11,9 +10,8 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback
+    async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up sensor for an entry."""
     server = hass.data[DOMAIN].get(entry.entry_id)
     if not server:
         _LOGGER.error("No server instance for entry %s", entry.entry_id)
@@ -29,7 +27,7 @@ class SyslogSensor(SensorEntity):
     def __init__(self, server, entry_id: str, name: str):
         self.server = server
         self.entry_id = entry_id
-        self._attr_name = f"{name}"
+        self._attr_name = name
         self._attr_unique_id = f"{DOMAIN}_{entry_id}"
 
     @property
@@ -38,10 +36,7 @@ class SyslogSensor(SensorEntity):
 
     @property
     def extra_state_attributes(self):
-        return {
-            "source_ip": self.server.last_source,
-            "severity": self.server.last_severity
-        }
+        return {"source_ip": self.server.last_source, "severity": self.server.last_severity}
 
     async def async_added_to_hass(self):
         self.server.sensors.append(self)
