@@ -4,6 +4,6 @@
     "homeassistant": "2023.0.0",
     "content_in_root": false,
     "render_readme": true,
-    "country": "global",
+    "country": "ALL",
     "type": "integration"
   }

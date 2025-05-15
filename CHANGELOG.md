@@ -45,3 +45,9 @@ You can now create one integration per device/protocol, name each entry (e.g. â€
 
 ### Fixed
 - TLS feature has fixed. Extend with certificate handling.
+
+## [1.0.7] - 2025-05-15
+
+### Added
+- Added English translation
+- Added validation for HACS

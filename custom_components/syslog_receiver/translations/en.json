@@ -1,0 +1,44 @@
+{
+    "title": "Syslog Receiver",
+    "config": {
+      "step": {
+        "user": {
+          "title": "Configure Syslog Receiver",
+          "description": "",
+          "data": {
+            "instance_name": "Instance Name",
+            "host": "Host",
+            "port": "Port",
+            "protocol": "Protocol",
+            "use_tls": "Use TLS",
+            "certfile": "Server Certificate File",
+            "keyfile": "Private Key File",
+            "allowed_ips": "Allowed IPs (comma-separated)",
+            "min_severity": "Minimum Severity",
+            "enable_sensors": "Enable Sensor Entity"
+          }
+        }
+      }
+    },
+    "options": {
+      "step": {
+        "init": {
+          "title": "Syslog Receiver Options",
+          "description": "",
+          "data": {
+            "instance_name": "Instance Name",
+            "host": "Host",
+            "port": "Port",
+            "protocol": "Protocol",
+            "use_tls": "Use TLS",
+            "certfile": "Server Certificate File",
+            "keyfile": "Private Key File",
+            "allowed_ips": "Allowed IPs (comma-separated)",
+            "min_severity": "Minimum Severity",
+            "enable_sensors": "Enable Sensor Entity"
+          }
+        }
+      }
+    }
+  }
+  
