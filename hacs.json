@@ -1,9 +1,5 @@
 {
     "name": "Syslog Receiver",
-    "domain": "syslog_receiver",
-    "homeassistant": "2023.0.0",
     "content_in_root": false,
-    "render_readme": true,
-    "country": "ALL",
-    "type": "integration"
+    "country": "EN"
   }
