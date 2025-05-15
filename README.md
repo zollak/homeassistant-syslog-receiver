@@ -23,8 +23,16 @@ This Home Assistant component listens for incoming syslog messages over UDP or T
 
 1. Navigate to **Settings > Devices & Services > Integrations**.
 2. Click **Add Integration**, search for **Syslog Receiver**.
-3. Enter the host, port, protocol (UDP/TCP), TLS option, allowed IPs, minimum severity, and sensor toggle.
-4. Save and start receiving syslog messages!
+3. Enter the following fields:
+   - **Instance Name**: A friendly name for this listener
+   - **Host**: IP address to bind (e.g., `0.0.0.0`)
+   - **Port**: Port number (e.g., `514`)
+   - **Protocol**: `UDP`, `TCP`
+   - **Use TLS**: Enable encrypted connections
+   - **Allowed IPs**: Comma-separated list of source IPs to accept
+   - **Minimum Severity**: Syslog priority threshold
+   - **Enable Sensors**: Create a sensor entity for last message
+4. Save to start the syslog listener.
 
 ## Usage
 

@@ -23,3 +23,17 @@
 - Optional sensor entities for last received message
 - Full UI-based configuration and options flows
 - Debug and error logging for troubleshooting
+
+## [1.0.4] - 2025-05-14
+
+First working version, but for 1 instance
+
+### Fixed
+ - all bug fixed that caused error during configuration, reconfiguration, reload service
+
+## [1.0.5] - 2025-05-15
+
+### Added
+ - Reworked the integration for multiple instances and per-device naming.
+
+You can now create one integration per device/protocol, name each entry (e.g. “NAS UDP” vs “Firewall TCP-TLS”), and have separate sensors.

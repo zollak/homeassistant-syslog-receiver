@@ -5,6 +5,7 @@ DEFAULT_PROTOCOL = "UDP"
 DEFAULT_USE_TLS = False
 DEFAULT_ALLOWED_IPS = ""
 DEFAULT_MIN_SEVERITY = "info"
+DEFAULT_INSTANCE_NAME = "Syslog Receiver"
 MIN_SEVERITY_LEVELS = {
     "emerg": 0,
     "alert": 1,
