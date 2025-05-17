@@ -51,3 +51,4 @@ You can now create one integration per device/protocol, name each entry (e.g. â€
 ### Added
 - Added English translation
 - Added validation for HACS
+- Added hassfest validation 
