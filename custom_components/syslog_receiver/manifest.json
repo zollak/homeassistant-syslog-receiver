@@ -1,11 +1,11 @@
 {
     "domain": "syslog_receiver",
     "name": "Syslog Receiver",
-    "documentation": "https://github.com/zollak/homeassistant-syslog-receiver",
-    "issue_tracker": "https://github.com/zollak/homeassistant-syslog-receiver/issues",
-    "dependencies": [],
     "codeowners": ["@zollak"],
-    "version": "1.0.7",
     "config_flow": true,
-    "iot_class": "local_push"
-}
+    "dependencies": [],
+    "documentation": "https://github.com/zollak/homeassistant-syslog-receiver",
+    "iot_class": "local_push",
+    "issue_tracker": "https://github.com/zollak/homeassistant-syslog-receiver/issues",
+    "version": "1.0.7"
+  }
