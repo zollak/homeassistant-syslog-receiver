@@ -1,5 +1,4 @@
 {
     "name": "Syslog Receiver",
-    "content_in_root": false,
-    "country": "ALL"
+    "content_in_root": false
   }
