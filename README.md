@@ -17,9 +17,8 @@ This is a custom integration for Home Assistant which listens for incoming syslo
 ## Installation via HACS
 
 1. Install the [HACS](https://hacs.xyz/) integration if you haven't already.
-2. Go to the HACS store, click on the "Add Repository" button, and search for "Syslog Receiver".
-3. Add the repository URL (`https://github.com/zollak/homeassistant-syslog-receiver`).
-4. Install the integration.
+2. Go to the HACS store, search for **Syslog Receiver**, or click on the "Add Repository" button and add repository URL `https://github.com/zollak/homeassistant-syslog-receiver`.
+3. Download, then **Restart Home Assistant**.
 
 ## Configuration
 
