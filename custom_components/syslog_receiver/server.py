@@ -80,7 +80,7 @@ class SyslogServer:
                 self.transports.append(transport)
                 _LOGGER.debug("Started UDP endpoint on %s [%s]", sockaddr, af)
 
-        else:
+        elif proto in ("TCP", "TCP+TLS"):
             # TCP or TCP + TLS
             infos = socket.getaddrinfo(
                 host, port,
@@ -124,6 +124,8 @@ class SyslogServer:
                     sockaddr,
                     af,
                 )
+        else:
+            raise ValueError(f"Unsupported protocol {proto}")
 
     async def stop(self):
         """Stop all syslog listener(s)."""
