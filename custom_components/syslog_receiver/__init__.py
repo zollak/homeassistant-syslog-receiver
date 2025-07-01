@@ -27,6 +27,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     enable_sensors = entry.options.get("enable_sensors", entry.data.get("enable_sensors", False))
     if enable_sensors:
-        await hass.config_entries.async_forward_entry_unloads(entry, ["sensor"])
+        for platform in ["sensor"]:
+            await hass.config_entries.async_forward_entry_unload(entry, platform)
 
     return True
