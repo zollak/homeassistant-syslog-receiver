@@ -75,5 +75,10 @@ Frist release in HACS.
 
 ## [1.1.0-beta3] - 2025-07-01
 
+### Added
+- Added protocol check
+
+## [1.1.0-beta4] - 2025-07-01
+
 ### Fixed
 - Fix protocol check

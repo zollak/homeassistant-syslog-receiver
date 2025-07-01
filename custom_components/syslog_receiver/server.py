@@ -43,7 +43,7 @@ class SyslogServer:
         proto = self.config["protocol"].lower()
         loop = asyncio.get_running_loop()
 
-        if proto == "UDP":
+        if proto == "udp":
             # Bind for all families (IPv4/IPv6) returned by getaddrinfo
             infos = socket.getaddrinfo(
                 host, port,
@@ -80,7 +80,7 @@ class SyslogServer:
                 self.transports.append(transport)
                 _LOGGER.debug("Started UDP endpoint on %s [%s]", sockaddr, af)
 
-        elif proto in ("TCP", "TCP+TLS"):
+        elif proto in ("tcp", "tcp+tls"):
             # TCP or TCP + TLS
             infos = socket.getaddrinfo(
                 host, port,
