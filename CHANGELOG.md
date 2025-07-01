@@ -46,9 +46,24 @@ You can now create one integration per device/protocol, name each entry (e.g. ‚Ä
 ### Fixed
 - TLS feature has fixed. Extend with certificate handling.
 
-## [1.0.7] - 2025-05-15
+## [1.0.7] - 2025-05-18
 
 ### Added
 - Added English translation
 - Added validation for HACS
 - Added hassfest validation 
+
+## [1.0.8] - 2025-05-15
+
+### Fixed
+Fixed hacs.jason with removed country.
+
+## [1.0.9] - 2025-05-15
+
+Same as v1.0.8. 
+Frist release in HACS.
+
+## [1.1.0-beta] - 2025-07-01
+
+### Added
+- **IPv6**: bind on IPv6/dual‚Äêstack sockets for UDP & TCP
