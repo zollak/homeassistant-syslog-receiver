@@ -39,6 +39,8 @@ This is a custom integration for Home Assistant which listens for incoming syslo
 
 ## Example Use Cases of Configuration
 
+### IPv4 Support
+
 - **UDP Plain Listener**
   - Host: `0.0.0.0`
   - Port: `514`
@@ -64,6 +66,17 @@ This is a custom integration for Home Assistant which listens for incoming syslo
     10.10.10.2, 10.10.10.3, 10.10.10.4
     ```
   - Currently, subnet masks are not supported; enumerate each IP.
+
+### IPv6 Support
+
+This integration now supports binding on IPv6 interfaces in addition to IPv4. You can:
+
+* **Bind to all IPv6 interfaces** using `::` as the Host.
+* **Bind to a specific IPv6 address**, like `fe80::1`.
+* Use both IPv4 and IPv6 simultaneously by using `::` on systems where dual-stack is enabled (i.e., it also accepts IPv4 on the same port).
+* Add **IPv6 source addresses** to the Allowed IPs field (e.g., `fe80::1, 2001:db8::42`).
+
+Make sure your Home Assistant system supports IPv6 binding and the ports used are open in the host firewall.
 
 ## TLS Setup
 
