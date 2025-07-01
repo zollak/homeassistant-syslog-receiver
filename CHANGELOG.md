@@ -72,3 +72,8 @@ Frist release in HACS.
 
 ### Fixed
 - Fix unload multiple platforms
+
+## [1.1.0-beta3] - 2025-07-01
+
+### Fixed
+- Fix protocol check
