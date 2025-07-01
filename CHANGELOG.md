@@ -53,12 +53,12 @@ You can now create one integration per device/protocol, name each entry (e.g. ‚Ä
 - Added validation for HACS
 - Added hassfest validation 
 
-## [1.0.8] - 2025-05-15
+## [1.0.8] - 2025-06-08
 
 ### Fixed
 Fixed hacs.jason with removed country.
 
-## [1.0.9] - 2025-05-15
+## [1.0.9] - 2025-06-09
 
 Same as v1.0.8. 
 Frist release in HACS.
@@ -67,3 +67,8 @@ Frist release in HACS.
 
 ### Added
 - **IPv6**: bind on IPv6/dual‚Äêstack sockets for UDP & TCP
+
+## [1.1.0-beta2] - 2025-07-01
+
+### Fixed
+- Fix unload multiple platforms
