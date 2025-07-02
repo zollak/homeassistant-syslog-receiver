@@ -26,28 +26,31 @@ class SyslogServer:
 
         # Prepare SSL context if TLS is enabled
         self.ssl_context = None
-        if config.get("use_tls"):
+        if self.__get_option("use_tls"):
             self.ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-            cert = config.get("certfile")
-            key = config.get("keyfile")
+            cert = self.__get_option("certfile")
+            key = self.__get_option("keyfile")
             try:
                 self.ssl_context.load_cert_chain(certfile=cert, keyfile=key)
             except ssl.SSLError as ex:
                 _LOGGER.error("Failed to load TLS cert/key: %s", ex)
                 raise
 
+    def __get_option(self, key: str, default=None):
+        return self.options.get(key, self.config.get(key, default))
+        
     async def start(self):
         """Start the syslog listener(s) for UDP or TCP (with optional TLS)."""
-        host = self.config["host"] or None
-        port = self.config["port"]
-        proto = self.config["protocol"].lower()
+        host = self.__get_option("host", "")
+        port = self.__get_option("port", "")
+        proto = self.__get_option("protocol", "").lower()
         loop = asyncio.get_running_loop()
 
         if proto == "udp":
             # Bind for all families (IPv4/IPv6) returned by getaddrinfo
             _LOGGER.debug(f"getaddrinfo host={host} port={port} config={self.config} options={self.options}")
             infos = socket.getaddrinfo(
-                host, port,
+                host if len(host) else None, port, # host=None allow both V4 and V6
                 family=socket.AF_UNSPEC,
                 type=socket.SOCK_DGRAM,
                 proto=0,
@@ -116,7 +119,7 @@ class SyslogServer:
                         _LOGGER.debug("SO_REUSEPORT not available on this platform")
                     sock.bind(sockaddr)
 
-                    use_ssl = self.ssl_context if self.config.get("use_tls") else None
+                    use_ssl = self.ssl_context if self.__get_option("use_tls") else None
                     server = await asyncio.start_server(
                         self.handle_tcp,
                         sock=sock,
@@ -168,9 +171,10 @@ class SyslogServer:
         src_ip = addr[0]
 
         # Filter by allowed IPs
-        raw_ips = self.options.get("allowed_ips", self.config.get("allowed_ips", ""))
+        raw_ips = self.__get_option("allowed_ips", "")
         ips = [ip.strip() for ip in raw_ips.split(",") if ip.strip()]
         if ips and src_ip not in ips:
+            _LOGGER.debug(f"Ignoring message from {src_ip}")
             return
 
         # Extract severity from PRI if present
@@ -178,7 +182,7 @@ class SyslogServer:
         if m:
             pri = int(m.group(1))
             severity = pri & 0x07
-            min_level = MIN_SEVERITY_LEVELS.get(self.options.get("min_severity", self.config.get("min_severity", "info")), 6)
+            min_level = MIN_SEVERITY_LEVELS.get(self.__get_option("min_severity", "info"), 6)
             if severity > min_level:
                 return
             body = m.group(2).strip()
