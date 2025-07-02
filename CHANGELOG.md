@@ -82,3 +82,13 @@ Frist release in HACS.
 
 ### Fixed
 - Fix protocol check
+
+## [1.1.0-beta5] - 2025-07-02
+
+### Added
+- More logs in debug mode
+- More usage examples
+
+### Fixed
+- Force the listener to bind on all available interfaces (IPv4 + IPv6)
+- Syslog receiver instance is only created if a socket was bound successfully — which avoids silent failures and confusion.
