@@ -38,13 +38,14 @@ class SyslogServer:
 
     async def start(self):
         """Start the syslog listener(s) for UDP or TCP (with optional TLS)."""
-        host = self.config["host"]
+        host = self.config["host"] or None
         port = self.config["port"]
         proto = self.config["protocol"].lower()
         loop = asyncio.get_running_loop()
 
         if proto == "udp":
             # Bind for all families (IPv4/IPv6) returned by getaddrinfo
+            _LOGGER.debug(f"getaddrinfo host={host} port={port} config={self.config} options={self.options}")
             infos = socket.getaddrinfo(
                 host, port,
                 family=socket.AF_UNSPEC,
@@ -52,7 +53,11 @@ class SyslogServer:
                 proto=0,
                 flags=socket.AI_PASSIVE
             )
+            _LOGGER.debug(f"infos={infos}")
+            bound = False  # Track if any socket successfully bound
+
             for af, socktype, proto_num, _, sockaddr in infos:
+                _LOGGER.debug(f" af={af} socktype={socktype} proto_num={proto_num}")
                 try:
                     sock = socket.socket(af, socktype, proto_num)
                     sock.setblocking(False)
@@ -65,6 +70,15 @@ class SyslogServer:
                     if af == socket.AF_INET6 and hasattr(socket, "IPV6_V6ONLY"):
                         sock.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
                     sock.bind(sockaddr)
+
+                    transport, _ = await loop.create_datagram_endpoint(
+                        lambda: SyslogUDPProtocol(self),
+                        sock=sock
+                    )
+                    self.transports.append(transport)
+                    _LOGGER.debug("Started UDP endpoint on %s [%s]", sockaddr, af)
+                    bound = True
+
                 except Exception as ex:
                     _LOGGER.warning("Could not bind UDP %s: %s", sockaddr, ex)
                     try:
@@ -73,15 +87,13 @@ class SyslogServer:
                         pass
                     continue
 
-                transport, _ = await loop.create_datagram_endpoint(
-                    lambda: SyslogUDPProtocol(self),
-                    sock=sock
-                )
-                self.transports.append(transport)
-                _LOGGER.debug("Started UDP endpoint on %s [%s]", sockaddr, af)
+            if not bound:
+                _LOGGER.error("Failed to bind any UDP socket on host=%s port=%s", host, port)
+                raise ValueError(f"UDP socket binding failed on {host}:{port}")
 
         elif proto in ("tcp", "tcp+tls"):
             # TCP or TCP + TLS
+            _LOGGER.debug(f"getaddrinfo host={host} port={port} config={self.config} options={self.options}")
             infos = socket.getaddrinfo(
                 host, port,
                 family=socket.AF_UNSPEC,
@@ -89,7 +101,11 @@ class SyslogServer:
                 proto=0,
                 flags=socket.AI_PASSIVE
             )
+            _LOGGER.debug(f"infos={infos}")
+            bound = False
+
             for af, socktype, proto_num, _, sockaddr in infos:
+                _LOGGER.debug(f" af={af} socktype={socktype} proto_num={proto_num}")
                 try:
                     sock = socket.socket(af, socktype, proto_num)
                     sock.setblocking(False)
@@ -99,6 +115,25 @@ class SyslogServer:
                     except OSError:
                         _LOGGER.debug("SO_REUSEPORT not available on this platform")
                     sock.bind(sockaddr)
+
+                    use_ssl = self.ssl_context if self.config.get("use_tls") else None
+                    server = await asyncio.start_server(
+                        self.handle_tcp,
+                        sock=sock,
+                        ssl=use_ssl
+                    )
+                    self.servers.append(server)
+                    _LOGGER.debug(
+                        "Started TCP%s endpoint on %s [%s]",
+                        " +TLS" if use_ssl else "",
+                        sockaddr,
+                        af,
+                    )
+                    bound = True
+
+                except ssl.SSLError as ex:
+                    _LOGGER.error("TLS handshake setup failed on %s: %s", sockaddr, ex)
+                    raise
                 except Exception as ex:
                     _LOGGER.warning("Could not bind TCP %s: %s", sockaddr, ex)
                     try:
@@ -107,25 +142,12 @@ class SyslogServer:
                         pass
                     continue
 
-                use_ssl = self.ssl_context if self.config.get("use_tls") else None
-                try:
-                    server = await asyncio.start_server(
-                        self.handle_tcp,
-                        sock=sock,
-                        ssl=use_ssl
-                    )
-                except ssl.SSLError as ex:
-                    _LOGGER.error("TLS handshake setup failed on %s: %s", sockaddr, ex)
-                    raise
-                self.servers.append(server)
-                _LOGGER.debug(
-                    "Started TCP%s endpoint on %s [%s]",
-                    " +TLS" if use_ssl else "",
-                    sockaddr,
-                    af,
-                )
+            if not bound:
+                _LOGGER.error("Failed to bind any TCP socket on host=%s port=%s", host, port)
+                raise ValueError(f"TCP socket binding failed on {host}:{port}")
+
         else:
-            raise ValueError(f"Unsupported protocol {proto}")
+            raise ValueError(f"Unsupported protocol: {proto}")
 
     async def stop(self):
         """Stop all syslog listener(s)."""

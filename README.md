@@ -106,7 +106,126 @@ Once configured, you can listen for `syslog_received` events:
   action:
     # use event.data.message, event.data.source_ip, event.data.severity
   ```
-- Enable the sensor in the integration options to add `sensor.syslog_receiver_<entry_id>`.
+
+---
+
+### ✅ 1. Automation example: notify on critical syslog errors
+
+```yaml
+trigger:
+  platform: event
+  event_type: syslog_receiver_message
+condition:
+  condition: template
+  value_template: "{{ trigger.event.data.severity <= 2 }}"
+action:
+  service: notify.mobile_app
+  data:
+    title: "[SYSLOG ERROR] {{ trigger.event.data.source_ip }}"
+    message: "{{ trigger.event.data.message }}"
+```
+---
+
+### ✅ 2. Log all messages from a specific device to file
+
+```yaml
+alias: "Log NAS syslog to file"
+trigger:
+  platform: event
+  event_type: syslog_receiver_message
+condition:
+  condition: template
+  value_template: "{{ trigger.event.data.source_ip == '10.10.10.50' }}"
+action:
+  - service: system_log.write
+    data:
+      level: info
+      message: "NAS syslog: {{ trigger.event.data.message }}"
+```
+
+---
+
+### ✅ 3. Send a persistent notification for login attempts
+
+```yaml
+alias: "Notify on SSH login attempt"
+trigger:
+  platform: event
+  event_type: syslog_receiver_message
+condition:
+  - condition: template
+    value_template: >-
+      "sshd" in trigger.event.data.message and (
+      "Accepted password" in trigger.event.data.message or
+      "Accepted publickey" in trigger.event.data.message)
+action:
+  - service: persistent_notification.create
+    data:
+      title: "SSH Login Detected"
+      message: >-
+        From {{ trigger.event.data.source_ip }}:
+        {{ trigger.event.data.message }}
+```
+
+---
+
+### ✅ 4. Create a scene trigger for router firewall rule changes
+
+```yaml
+alias: "Firewall Rule Changed"
+trigger:
+  platform: event
+  event_type: syslog_receiver_message
+condition:
+  condition: template
+  value_template: >
+    "filter rule changed" in trigger.event.data.message
+action:
+  - service: script.turn_on
+    target:
+      entity_id: script.notify_admin_change
+```
+
+---
+
+### ✅ 5. Turn on a light if a physical door sensor logs a state
+
+```yaml
+alias: "Trigger light on syslog motion"
+trigger:
+  platform: event
+  event_type: syslog_receiver_message
+condition:
+  condition: template
+  value_template: >
+    "Motion detected" in trigger.event.data.message
+    and trigger.event.data.source_ip == "192.168.1.99"
+action:
+  - service: light.turn_on
+    target:
+      entity_id: light.garden_spotlight
+```
+
+---
+
+### ✅ 6. Exclude debug messages from database (via sensor)
+
+If you're using the optional sensor, you may want to exclude low-severity updates in `recorder:` config:
+
+```yaml
+recorder:
+  exclude:
+    entity_globs:
+      - sensor.syslog_receiver_*
+  # or keep it but purge quickly:
+  purge_keep_days: 3
+```
+
+---
+
+### ✅ 7. Enable the sensor in the integration options to add `sensor.syslog_receiver_<entry_id>`.
+
+---
 
 ## Logging
 
