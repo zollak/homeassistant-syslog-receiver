@@ -92,3 +92,8 @@ Frist release in HACS.
 ### Fixed
 - Force the listener to bind on all available interfaces (IPv4 + IPv6)
 - Syslog receiver instance is only created if a socket was bound successfully — which avoids silent failures and confusion.
+
+## [1.1.0-beta6] - 2025-07-07
+
+### Fixed
+- always use options before config - Thanks for @ivanfmartinez the [#PR2](https://github.com/zollak/homeassistant-syslog-receiver/pull/2)
