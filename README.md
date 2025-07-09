@@ -37,6 +37,37 @@ This is a custom integration for Home Assistant which listens for incoming syslo
    - **Enable Sensors**: Create a sensor entity for last message
 4. Save to start the syslog listener.
 
+## ℹ️ Notes for Docker & Container Users
+
+If you run Home Assistant in Docker or similar containerized environments, especially with **MacVLAN**, there are a few important considerations:
+
+- Setting **`Host` to `0.0.0.0`** means "bind on all available interfaces". On most systems this works, but in **MacVLAN or strict Docker networks**, `0.0.0.0` may **not resolve to usable interfaces** inside the container.
+- If the syslog receiver does not appear to start or bind (nothing shows on `netstat -anu`), try:
+  1. Setting the **container's actual IP address** in the Host field (e.g., `10.0.0.7`).
+  2. Verifying that the port (e.g., `5514`) is **not used by another container** or service.
+  3. Enabling **debug logging** for the integration to check bind failures.
+
+```yaml
+logger:
+  logs:
+    custom_components.syslog_receiver: debug
+````
+
+* You can find the container’s IP address using:
+
+  ```bash
+  docker exec -it homeassistant ip a
+  ```
+* Binding to `::` (for IPv6) may also work if your container is dual-stack enabled.
+
+If the integration log shows:
+
+```text
+Could not bind UDP ('0.0.0.0', 5514): [Errno 99] Cannot assign requested address
+```
+
+…it means the bind failed. Use a valid, reachable IP instead.
+
 ## Example Use Cases of Configuration
 
 ### IPv4 Support
