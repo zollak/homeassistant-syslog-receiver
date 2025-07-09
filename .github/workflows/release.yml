@@ -18,6 +18,17 @@ jobs:
           mkdir dist
           zip -r dist/syslog_receiver-${{ github.ref_name }}.zip custom_components/syslog_receiver
 
+      # NEW STEP: Ensure the release exists and was created by this workflow
+      - name: Create GitHub Release (if missing)
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Upload ZIP to release
         uses: softprops/action-gh-release@v1
         with:

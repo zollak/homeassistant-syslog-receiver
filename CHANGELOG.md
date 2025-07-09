@@ -111,3 +111,8 @@ Frist release in HACS.
   * Fails early with a clear error if no address is returned for binding.
   * Retains all original debug logs and functionality.
   * Makes the system safer against silent misconfiguration (especially in Docker, MacVLAN, or IPv6-only contexts).
+
+## [1.1.3] - 2025-07-08
+
+### Added
+- Track Download counts in HACS
