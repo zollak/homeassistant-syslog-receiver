@@ -33,12 +33,14 @@ This is a custom integration for Home Assistant which listens for incoming syslo
 3. Enter the following fields:
    - **Instance Name**: A friendly name for this listener (entity name)
    - **Host**: IP address to bind (e.g., `0.0.0.0`, which means it binds on all interfaces on Home Assisstant server)
+     - Use `::` to bind to all IPv6 interfaces
+     - Avoid using `fe80::...` (link-local) unless you add a scope like `%eth0` For example: `fe80::abcd:1234:5678:9abc%eth0` (with interface name)
    - **Port**: Port number (e.g., `514`)
    - **Protocol**: `UDP`, `TCP`, or `TCP+TLS`
    - **Use TLS**: Enable encrypted connections
    - **Certfile**: Path to your server certificate (PEM file)
    - **Keyfile**: Path to your private key (PEM file)
-   - **Allowed IPs**: Comma-separated list of source IPs to accept (e.g., `10.10.10.2,10.10.10.3,10.10.10.10`)
+   - **Allowed IPs**: Comma-separated list of source IPs to accept (e.g., IPv4: `10.10.10.2,10.10.10.3,10.10.10.10`, IPv6: `fe80::1, 2001:db8::42`)
    - **Minimum Severity**: Syslog priority threshold
    - **Enable Sensors**: Create a sensor entity for last message
 4. Save to start the syslog listener.
@@ -131,7 +133,10 @@ Could not bind UDP ('0.0.0.0', 5514): [Errno 99] Cannot assign requested address
 This integration now supports binding on IPv6 interfaces in addition to IPv4. You can:
 
 * **Bind to all IPv6 interfaces** using `::` as the Host.
-* **Bind to a specific IPv6 address**, like `fe80::1`.
+* **Bind to a specific IPv6 address**, like `2001:db8::1234` or `fe80::abcd:1234%eth0`.
+* ❗ If you're using a **link-local IPv6 address** (`fe80::/10`), you **must include a scope** (e.g., `%eth0`) or the integration will fail to bind.
+* If you’re unsure, use `::` to bind all IPv6 interfaces safely on most systems.
+
 * Use both IPv4 and IPv6 simultaneously by using `::` on systems where dual-stack is enabled (i.e., it also accepts IPv4 on the same port).
 * Add **IPv6 source addresses** to the Allowed IPs field (e.g., `fe80::1, 2001:db8::42`).
 

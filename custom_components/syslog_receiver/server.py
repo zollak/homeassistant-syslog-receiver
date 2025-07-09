@@ -46,6 +46,15 @@ class SyslogServer:
         proto = self.__get_option("protocol", "").lower()
         loop = asyncio.get_running_loop()
 
+        # Validate IPv6 link-local address format
+        if isinstance(host, str) and host.startswith("fe80::") and "%" not in host:
+            _LOGGER.error(
+                "Link-local IPv6 address '%s' is missing a required interface scope (e.g. %%eth0). "
+                "Binding will fail without this. Please update your host value.",
+                host
+            )
+            raise ValueError(f"Invalid IPv6 link-local address '{host}' without scope")
+
         if proto == "udp":
             # Bind for all families (IPv4/IPv6) returned by getaddrinfo
             _LOGGER.debug(f"getaddrinfo host={host} port={port} config={self.config} options={self.options}")
