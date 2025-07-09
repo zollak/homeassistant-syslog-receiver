@@ -107,7 +107,7 @@ Frist release in HACS.
 
 ### Added
 - More error validation which:
-* Checks if `getaddrinfo()` returns empty result list.
-* Fails early with a clear error if no address is returned for binding.
-* Retains all original debug logs and functionality.
-* Makes the system safer against silent misconfiguration (especially in Docker, MacVLAN, or IPv6-only contexts).
+  * Checks if `getaddrinfo()` returns empty result list.
+  * Fails early with a clear error if no address is returned for binding.
+  * Retains all original debug logs and functionality.
+  * Makes the system safer against silent misconfiguration (especially in Docker, MacVLAN, or IPv6-only contexts).
