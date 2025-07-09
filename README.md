@@ -37,7 +37,29 @@ This is a custom integration for Home Assistant which listens for incoming syslo
    - **Enable Sensors**: Create a sensor entity for last message
 4. Save to start the syslog listener.
 
-## ℹ️ Notes for Docker & Container Users
+## 🐳 Installation in Docker without HACS
+
+If you are using Home Assistant Core in a **Docker container without Supervisor**, HACS is not available by default.
+
+To install this integration manually:
+
+1. Clone this repository or download the latest release ZIP.
+
+2. Copy the folder `custom_components/syslog_receiver` into:
+
+   ```
+   /config/custom_components/syslog_receiver
+   ```
+
+   *(Ensure this path is in your Docker volume mapped to `/config`)*
+
+3. Restart Home Assistant Core.
+
+4. The integration will now be available to add via the UI (Config Flow).
+
+Optional: You can install [HACS manually](https://hacs.xyz/docs/installation/manual/) in Docker-based setups to manage custom integrations through the UI.
+
+### ℹ️ Notes for Docker & Container Users
 
 If you run Home Assistant in Docker or similar containerized environments, especially with **MacVLAN**, there are a few important considerations:
 
