@@ -1,5 +1,5 @@
 [![version](https://img.shields.io/github/manifest-json/v/zollak/homeassistant-syslog-receiver?filename=custom_components%2Fsyslog_receiver%2Fmanifest.json)](https://github.com/zollak/homeassistant-syslog-receiver/releases/latest)
-[![downloads](https://img.shields.io/github/downloads/zollak/homeassistant-syslog-receiver/total)](https://github.com/zollak/homeassistant-syslog-receiver/releases)
+[![downloads](https://img.shields.io/github/downloads/zollak/homeassistant-syslog-receiver/total?color=brightgreen)](https://github.com/zollak/homeassistant-syslog-receiver/releases)
 [![stars](https://img.shields.io/github/stars/zollak/homeassistant-syslog-receiver)](https://github.com/zollak/homeassistant-syslog-receiver/stargazers)
 [![issues](https://img.shields.io/github/issues/zollak/homeassistant-syslog-receiver)](https://github.com/zollak/homeassistant-syslog-receiver/issues)
 [![HACS](https://img.shields.io/badge/HACS-Custom-blue.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=zollak&repository=homeassistant-syslog-receiver&category=Integration)
