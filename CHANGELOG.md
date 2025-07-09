@@ -96,9 +96,18 @@ Frist release in HACS.
 ## [1.1.0-beta6] - 2025-07-07
 
 ### Fixed
-- always use options before config - Thanks for @ivanfmartinez the [#PR2](https://github.com/zollak/homeassistant-syslog-receiver/pull/2)
+- Always use options before config - Thanks for @ivanfmartinez the [#PR2](https://github.com/zollak/homeassistant-syslog-receiver/pull/2)
 
 ## [1.1.0] - 2025-07-08
 
 ### Added
-- Ipv6 support
+- IPv6 support
+
+## [1.1.1] - 2025-07-08
+
+### Added
+- More error validation which:
+* Checks if `getaddrinfo()` returns empty result list.
+* Fails early with a clear error if no address is returned for binding.
+* Retains all original debug logs and functionality.
+* Makes the system safer against silent misconfiguration (especially in Docker, MacVLAN, or IPv6-only contexts).

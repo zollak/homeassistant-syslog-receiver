@@ -56,6 +56,9 @@ class SyslogServer:
                 proto=0,
                 flags=socket.AI_PASSIVE
             )
+            if not infos:
+                _LOGGER.error("getaddrinfo() returned no results for UDP bind: host=%s port=%s", host, port)
+                raise ValueError(f"Cannot bind UDP: no usable address found for host={host} port={port}")
             _LOGGER.debug(f"infos={infos}")
             bound = False  # Track if any socket successfully bound
 
@@ -104,6 +107,9 @@ class SyslogServer:
                 proto=0,
                 flags=socket.AI_PASSIVE
             )
+            if not infos:
+                _LOGGER.error("getaddrinfo() returned no results for TCP bind: host=%s port=%s", host, port)
+                raise ValueError(f"Cannot bind TCP: no usable address found for host={host} port={port}")
             _LOGGER.debug(f"infos={infos}")
             bound = False
 
