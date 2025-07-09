@@ -97,3 +97,8 @@ Frist release in HACS.
 
 ### Fixed
 - always use options before config - Thanks for @ivanfmartinez the [#PR2](https://github.com/zollak/homeassistant-syslog-receiver/pull/2)
+
+## [1.1.0] - 2025-07-08
+
+### Added
+- Ipv6 support
