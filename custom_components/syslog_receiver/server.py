@@ -8,17 +8,18 @@ from .const import DOMAIN, MIN_SEVERITY_LEVELS
 _LOGGER = logging.getLogger(__name__)
 
 class SyslogServer:
+    """Syslog server for receiving, filtering, and dispatching syslog messages over UDP or TCP."""
+
     def __init__(self, hass, config, options):
+        """Initialize the server instance with config and optional overrides."""
         self.hass = hass
         self.config = config
         self.options = options
 
-        # For UDP transports (may be multiple on v4/v6)
-        self.transports = []
-        # For TCP servers (may be multiple on v4/v6)
-        self.servers = []
+        self.transports = []  # Active UDP socket transports
+        self.servers = []     # Active TCP server instances
 
-        # Sensor support
+        # For sensor entity support
         self.sensors = []
         self.last_message = None
         self.last_source = None
@@ -37,16 +38,17 @@ class SyslogServer:
                 raise
 
     def __get_option(self, key: str, default=None):
+        """Helper to fetch option override or fallback to config."""
         return self.options.get(key, self.config.get(key, default))
         
     async def start(self):
-        """Start the syslog listener(s) for UDP or TCP (with optional TLS)."""
+        """Start the syslog listener(s) for UDP or TCP (optionally with TLS)."""
         host = self.__get_option("host", "")
         port = self.__get_option("port", "")
         proto = self.__get_option("protocol", "").lower()
         loop = asyncio.get_running_loop()
 
-        # Validate IPv6 link-local address format
+        # Check for malformed IPv6 link-local addresses (scope required)
         if isinstance(host, str) and host.startswith("fe80::") and "%" not in host:
             _LOGGER.error(
                 "Link-local IPv6 address '%s' is missing a required interface scope (e.g. %%eth0). "
@@ -55,8 +57,8 @@ class SyslogServer:
             )
             raise ValueError(f"Invalid IPv6 link-local address '{host}' without scope")
 
+        # Handle UDP sockets
         if proto == "udp":
-            # Bind for all families (IPv4/IPv6) returned by getaddrinfo
             _LOGGER.debug(f"getaddrinfo host={host} port={port} config={self.config} options={self.options}")
             infos = socket.getaddrinfo(
                 host if len(host) else None, port, # host=None allow both V4 and V6
@@ -81,7 +83,7 @@ class SyslogServer:
                         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
                     except OSError:
                         _LOGGER.debug("SO_REUSEPORT not available on this platform")
-                    # Allow dual-stack if IPv6
+                    # Enable dual-stack mode if IPv6 (accepts both v6 and v4 on same port)
                     if af == socket.AF_INET6 and hasattr(socket, "IPV6_V6ONLY"):
                         sock.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
                     sock.bind(sockaddr)
@@ -106,8 +108,8 @@ class SyslogServer:
                 _LOGGER.error("Failed to bind any UDP socket on host=%s port=%s", host, port)
                 raise ValueError(f"UDP socket binding failed on {host}:{port}")
 
+        # Handle TCP (plain or TLS)
         elif proto in ("tcp", "tcp+tls"):
-            # TCP or TCP + TLS
             _LOGGER.debug(f"getaddrinfo host={host} port={port} config={self.config} options={self.options}")
             infos = socket.getaddrinfo(
                 host, port,
@@ -168,7 +170,7 @@ class SyslogServer:
             raise ValueError(f"Unsupported protocol: {proto}")
 
     async def stop(self):
-        """Stop all syslog listener(s)."""
+        """Stop all listeners and clean up sockets."""
         # UDP transports
         for transport in self.transports:
             transport.close()
@@ -181,7 +183,7 @@ class SyslogServer:
         self.servers.clear()
 
     def process_message(self, data: bytes, addr):
-        """Decode, filter, and fire an event for each incoming syslog message."""
+        """Handle a received syslog packet: decode, filter, store, and fire an HA event."""
         message = data.decode(errors="ignore").strip()
         src_ip = addr[0]
 
@@ -192,7 +194,7 @@ class SyslogServer:
             _LOGGER.debug(f"Ignoring message from {src_ip}")
             return
 
-        # Extract severity from PRI if present
+        # Parse syslog priority header (e.g., <14>) and extract severity
         m = re.match(r"<(\d+)>(.*)", message)
         if m:
             pri = int(m.group(1))
@@ -210,17 +212,17 @@ class SyslogServer:
         self.last_source = src_ip
         self.last_severity = severity
 
-        # Fire the Home Assistant event
+        # Fire event on Home Assistant event bus
         event_data = {"message": body, "source_ip": src_ip, "severity": severity}
         self.hass.bus.async_fire(f"{DOMAIN}_message", event_data)
         _LOGGER.info("Received %s", event_data)
 
-        # TODO: check if this two lines are neccessary:
+        # Notify all registered sensors to update their state with the latest message
         for sensor in self.sensors:
             sensor.async_schedule_update_ha_state()
 
     async def handle_tcp(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
-        """Handle an incoming TCP connection and read syslog lines."""
+        """Handle a TCP client: receive lines and pass to process_message()."""
         addr = writer.get_extra_info("peername")
         try:
             while data := await reader.readline():
@@ -232,14 +234,15 @@ class SyslogServer:
             await writer.wait_closed()
 
 class SyslogUDPProtocol(asyncio.DatagramProtocol):
-    """UDP protocol wrapper for SyslogServer."""
+    """UDP protocol implementation for asyncio loop."""
     def __init__(self, server: SyslogServer):
         super().__init__()
         self.server = server
 
     def connection_made(self, transport: asyncio.BaseTransport):
-        # Transport is ready
+        # Transport is connected and ready (no-op for now)
         pass
 
     def datagram_received(self, data: bytes, addr):
+        """Handle each UDP packet received and pass to server logic."""
         self.server.process_message(data, addr)
