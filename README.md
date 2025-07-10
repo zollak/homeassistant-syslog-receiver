@@ -157,6 +157,103 @@ If the cert/key are invalid or missing, the integration will log an error and fa
   3. **TCP + TLS** (encrypted)
 - For **UDP + TLS** (DTLS), a third-party DTLS stack or custom implementation would be required, as the built-in `ssl` module does not provide DTLS.
 
+### 🔐 TLS Certificate Setup
+
+To securely receive syslog messages using **TCP + TLS**, you must provide a certificate and private key to the Syslog Receiver integration. This allows the server to authenticate itself to clients (your syslog sources) and encrypt the connection.
+
+#### 1. Generate a Self-Signed TLS Certificate (for testing/demo)
+
+Use `openssl` to generate a private key and self-signed certificate valid for 365 days:
+
+```bash
+openssl req -x509 -newkey rsa:2048 -keyout tls_key.pem -out tls_cert.pem -days 365 -nodes -subj "/CN=syslog.local"
+```
+
+This creates two files:
+
+* `tls_key.pem` – your **private key**
+* `tls_cert.pem` – your **self-signed certificate**
+
+You can rename these if desired.
+
+> 🧪 Note: Self-signed certificates are sufficient for local testing but may cause trust issues on syslog clients unless you disable certificate verification or import the CA.
+
+---
+
+#### 2. Store the Cert & Key in Home Assistant
+
+* **Recommended Location:** Place the `.pem` files in your Home Assistant configuration directory (e.g., `/config/ssl/`).
+
+  Example:
+
+  ```bash
+  mkdir -p /config/ssl/syslog
+  mv tls_cert.pem tls_key.pem /config/ssl/syslog/
+  ```
+
+* In the integration configuration:
+
+  * **Certfile:** `/config/ssl/syslog/tls_cert.pem`
+  * **Keyfile:** `/config/ssl/syslog/tls_key.pem`
+
+> 💡 Home Assistant maps `/config` to the internal config folder even in Docker or supervised installs.
+
+---
+
+#### 3. Configure the Syslog Client (Your Device)
+
+On the sending device (NAS, router, Linux server, etc.), configure it to:
+
+* Use **TCP or TLS** protocol.
+* Point to the **IP address of your Home Assistant server**.
+* Use the **same port number** configured in the Syslog Receiver integration (e.g., 6514).
+* **Trust the certificate** (if possible) or disable verification.
+
+**Example (Linux with rsyslog):**
+Edit `/etc/rsyslog.conf` or a custom file under `/etc/rsyslog.d/`:
+
+```bash
+# Forward all logs to HA via TLS
+*.* @@(o)192.168.1.100:6514
+```
+
+* `@@` = TCP
+* `(o)` = TLS + optional certificate validation
+
+For stricter verification:
+
+```bash
+*.* @@(o):192.168.1.100:6514;RSYSLOG_SyslogProtocol23Format
+```
+
+---
+
+#### 4. Troubleshooting TLS
+
+* If the certificate or key is missing or invalid, Home Assistant will log:
+
+  ```
+  Failed to load TLS cert/key: ...
+  ```
+* If clients cannot connect:
+
+  * Confirm port is open and reachable.
+  * Check firewall and container networking.
+  * Verify matching protocol and IP versions (IPv4 vs IPv6).
+
+---
+
+#### 🔁 Using Let's Encrypt (optional)
+
+If you already use Let's Encrypt or another ACME client:
+
+* Reuse the cert/key from `/ssl/fullchain.pem` and `/ssl/privkey.pem`.
+* Set those paths in the Syslog Receiver integration settings.
+
+> ⚠️ Be sure those files are readable by Home Assistant and have a valid domain (CN) matching what your client expects.
+
+---
+
 ## Usage
 
 Once configured, you can listen for `syslog_received` events:
