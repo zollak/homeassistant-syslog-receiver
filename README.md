@@ -217,8 +217,10 @@ Edit `/etc/rsyslog.conf` or a custom file under `/etc/rsyslog.d/`:
 *.* @@(o)192.168.1.100:6514
 ```
 
-* `@@` = TCP
-* `(o)` = TLS + optional certificate validation
+* `@@` = means TCP.
+* `(o)` = means TLS with **optional** certificate validation
+* Replace `192.168.1.100` with your Home Assistant IP address.
+* Replace `6514` with your configured port.
 
 For stricter verification:
 
