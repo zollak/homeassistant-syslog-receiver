@@ -34,22 +34,27 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Migrate old config entries to the latest version."""
-    _LOGGER.debug("Migrating configuration from version %s.%s", entry.version, entry.minor_version)
+    old_version = entry.version
+    new_version = old_version + 1
 
-    if entry.version > 1:
-        # This means the user has downgraded from a future version
-        _LOGGER.error("You would downgrade newer version of config_entry than version 1. It is not allowed. Please, remove the %s configuration and add create it again.", entry.titlec)
-        return False
+    _LOGGER.debug("Migrating configuration entry '%s' from version %s.%s", entry.title, old_version, entry.minor_version)
 
-    # Migrate to version 2 by adding encoding
-    if entry.version < 2:
-        #_LOGGER.warning("async_migrate_entry CALLED for version %s", entry.version)
-        _LOGGER.warning("Migrating config entry %s version %s", entry.title, entry.version)
-        data = dict(entry.data)
-        if "encoding" not in data:
-            data["encoding"] = "utf-8"  # default for backward compatibility
-        hass.config_entries.async_update_entry(entry, data=data, version=2)
-        _LOGGER.warning("Successfully migrated syslog_receiver config entry %s to version 2", entry.title)
+    data = dict(entry.data)
+    modified = False
+
+    # Add 'encoding' if missing
+    if "encoding" not in data:
+        data["encoding"] = "utf-8"
+        _LOGGER.info("Added missing 'encoding' field with default 'utf-8' for config entry '%s'", entry.title)
+        modified = True
+    else:
+        _LOGGER.debug("Encoding already present in config entry '%s', no changes needed", entry.title)
+
+    # If any field was added/modified, update the entry
+    if modified:
+        hass.config_entries.async_update_entry(entry, data=data, version=new_version)
+        _LOGGER.info("Successfully migrated syslog_receiver config entry '%s' from version %s to %s", entry.title, old_version, new_version)
         return True
 
-    return False # No migration needed
+    _LOGGER.debug("No migration needed for entry '%s'", entry.title)
+    return False
