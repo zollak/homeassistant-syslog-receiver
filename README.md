@@ -45,6 +45,35 @@ This is a custom integration for Home Assistant which listens for incoming syslo
    - **Enable Sensors**: Create a sensor entity for last message
 4. Save to start the syslog listener.
 
+## 🔤 Configurable Encoding Support
+
+Some devices send syslog messages using encodings other than the default UTF-8. To ensure compatibility, this integration allows you to choose from a list of common encodings, or specify a custom one.
+
+### Available Options
+
+When configuring a syslog receiver instance (either during initial setup or later via the "Reconfigure" option), you can select from:
+
+* `utf-8` (default)
+* `latin1`
+* `windows-1252`
+* `ascii`
+* `utf-16`
+* `gbk`
+* `big5`
+* `Other…` – for entering a custom encoding manually (e.g. `cp1251`, `shift_jis`, etc.)
+
+> 💡 If a custom encoding is set via the `"Other..."` option, it will be remembered and automatically added to the list the next time you open the configuration UI.
+
+### How It Works
+
+* Messages are decoded using the selected encoding.
+* If decoding fails or the encoding is unknown, the system will **fall back to UTF-8** or system default using `errors="replace"` to avoid crashes.
+
+### Example Use Case
+
+If you're receiving garbled (like this `�` character) or unreadable messages in Home Assistant, try switching to a more appropriate encoding like `windows-1252` or `latin-1`. Many legacy networking devices (including some switches, routers, or printers) default to non-UTF encodings.
+
+
 ## 🐳 Installation in Docker without HACS
 
 If you are using Home Assistant Core in a **Docker container without Supervisor**, HACS is not available by default.
