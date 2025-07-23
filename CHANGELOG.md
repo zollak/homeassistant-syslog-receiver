@@ -5,7 +5,7 @@
 ### Fixed
 - Fix async_migrate_entry logic that handling the config entry migration
 
-## [1.2.0] - 2025-07-23 (formerly v1.3.1)
+## [1.2.0] - 2025-07-23 (formerly v1.1.3)
 
 ### Added
 - New feature: Added configurable message encoding (UTF-8, Latin1, Windows-1252, etc.) - Closes [#4](https://github.com/zollak/homeassistant-syslog-receiver/issues/4). Thanks for @copydog the baseline idea and code.
