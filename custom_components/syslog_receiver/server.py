@@ -184,7 +184,15 @@ class SyslogServer:
 
     def process_message(self, data: bytes, addr):
         """Handle a received syslog packet: decode, filter, store, and fire an HA event."""
-        message = data.decode(errors="ignore").strip()
+        encoding = self.__get_option("encoding", None)
+        try:
+            if encoding:
+                message = data.decode(encoding, errors="replace").strip()
+            else:
+                message = data.decode(errors="replace").strip()
+        except LookupError:
+            _LOGGER.error("Invalid encoding '%s'. Falling back to default.", encoding)
+            message = data.decode(errors="replace").strip()
         src_ip = addr[0]
 
         # Filter by allowed IPs
