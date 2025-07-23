@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.1.3] - 2025-07-23
+
+### Added
+- New feature: Added configurable message encoding (UTF-8, Latin1, Windows-1252, etc.) - Closes [#4](https://github.com/zollak/homeassistant-syslog-receiver/issues/4)
+- Support for custom encodings via "Other..." option in configuration
+- Encoding is now stored per instance and used during decoding
+- Update comments in source code
+- Add TLS Certificate Setup and Configurable Encoding Support sections in to the README.md file
+
+### Fixed
+- Minor fixes for config flow stability and migration handling
+- Prevent binding error on IPv6 link-local address without scope
+
 ## [1.1.2] - 2025-07-08
 
 ### Added
