@@ -18,3 +18,14 @@ MIN_SEVERITY_LEVELS = {
     "info": 6,
     "debug": 7
 }
+DEFAULT_ENCODING = "utf-8"
+COMMON_ENCODINGS = [
+    "utf-8",
+    "latin1",
+    "windows-1252",
+    "ascii",
+    "utf-16",
+    "gbk",
+    "big5",
+    "Other…"
+]
