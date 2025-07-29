@@ -2,7 +2,9 @@
 [![downloads](https://img.shields.io/github/downloads/zollak/homeassistant-syslog-receiver/total?color=brightgreen)](https://github.com/zollak/homeassistant-syslog-receiver/releases)
 [![stars](https://img.shields.io/github/stars/zollak/homeassistant-syslog-receiver)](https://github.com/zollak/homeassistant-syslog-receiver/stargazers)
 [![issues](https://img.shields.io/github/issues/zollak/homeassistant-syslog-receiver)](https://github.com/zollak/homeassistant-syslog-receiver/issues)
-[![HACS](https://img.shields.io/badge/HACS-Custom-blue.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=zollak&repository=homeassistant-syslog-receiver&category=Integration)
+[![HACS](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=zollak&repository=homeassistant-syslog-receiver&category=Integration)
+[![Community Forum](https://img.shields.io/static/v1.svg?label=Community&message=Forum&color=41bdf5&logo=HomeAssistant&logoColor=white)](https://community.home-assistant.io/t/introducing-syslog-receiver-a-new-hacs-integration-for-ingesting-syslog-into-home-assistant)
+
 
 # Syslog Receiver integration for Home Assisstant
 
