@@ -1,0 +1,77 @@
+name: Bug report
+description: Report a problem with the integration
+title: "[Bug]: "
+labels: [bug]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting an issue! Please fill out as much as possible below.
+
+  - type: input
+    id: ha_version
+    attributes:
+      label: Home Assistant version
+      placeholder: e.g. 2025.7.2
+    validations:
+      required: true
+
+  - type: input
+    id: integration_version
+    attributes:
+      label: syslog_receiver version
+      placeholder: e.g. 1.2.1 (from manifest.json or HACS)
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: |
+        Describe your setup (Docker, Home Assistant OS, Supervised, Python venv, etc.).
+      placeholder: Home Assistant OS on Raspberry Pi 4, Docker on Ubuntu 22.04, etc.
+    validations:
+      required: false
+
+  - type: textarea
+    id: problem_description
+    attributes:
+      label: Describe the issue
+      description: What’s not working as expected? Include any error messages if available.
+      placeholder: The integration fails to start with "XYZ" error...
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Paste logs from Home Assistant or the syslog_receiver integration if relevant
+      render: shell
+    validations:
+      required: false
+
+  - type: textarea
+    id: reproduction_steps
+    attributes:
+      label: Steps to reproduce
+      description: How can we reproduce the issue?
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. See error
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Checklist
+      options:
+        - label: I am using the latest version of the integration
+          required: true
+        - label: I have filled out all required fields above
+          required: true

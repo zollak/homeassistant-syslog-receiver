@@ -1,0 +1,65 @@
+name: Feature request
+description: Suggest an enhancement or new functionality
+title: "[Feature]: "
+labels: [enhancement]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a feature! Please describe your idea as clearly as possible.
+
+  - type: input
+    id: ha_version
+    attributes:
+      label: Home Assistant version
+      placeholder: e.g. 2025.7.2
+    validations:
+      required: false
+
+  - type: input
+    id: integration_version
+    attributes:
+      label: syslog_receiver version
+      placeholder: e.g. 1.2.1 (from manifest.json or HACS)
+    validations:
+      required: false
+
+  - type: textarea
+    id: feature_description
+    attributes:
+      label: Describe the feature
+      description: What would you like to see added or changed?
+      placeholder: |
+        I would like the integration to support filtering syslog messages by hostname...
+    validations:
+      required: true
+
+  - type: textarea
+    id: use_case
+    attributes:
+      label: Use case or motivation
+      description: Why would this be helpful? What problem would it solve?
+      placeholder: This would allow me to filter logs from only specific devices in my network...
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional_info
+    attributes:
+      label: Additional context
+      description: Include screenshots, example logs, or other context if relevant.
+      placeholder: Example syslog message: <13>1 2025-07-29T12:45:00Z router1 ...
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Checklist
+      options:
+        - label: I have searched existing issues and feature requests to avoid duplicates
+          required: true
+        - label: This feature is not already supported by configuration or documentation
+          required: true
