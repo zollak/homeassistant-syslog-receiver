@@ -8,18 +8,25 @@ jobs:
   release-zip:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get version (strip 'v' if present)
+        id: version
+        uses: home-assistant/actions/helpers/version@master
+
+      - name: Set version in manifest.json
+        run: |
+          sed -i 's/"version": ".*"/"version": "${{ steps.version.outputs.version }}"/' \
+            custom_components/syslog_receiver/manifest.json
 
       - name: ZIP Integration Folder
         run: |
-          cd ${{ github.workspace }}/custom_components/syslog_receiver
-          zip -r syslog_receiver.zip ./
+          cd custom_components/syslog_receiver
+          zip -r ../../syslog_receiver.zip ./
 
       - name: Upload ZIP to GitHub Release
-        uses: svenstaro/upload-release-action@v2
+        uses: softprops/action-gh-release@v2
         with:
-          repo_token: ${{ secrets.PAT_TOKEN }}
-          file: custom_components/syslog_receiver/syslog_receiver.zip
-          asset_name: syslog_receiver.zip
-          tag: ${{ github.ref }}
-          overwrite: true
+          token: ${{ secrets.PAT_TOKEN }}
+          files: syslog_receiver.zip
