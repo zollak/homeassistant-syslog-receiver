@@ -289,7 +289,7 @@ If you already use Let's Encrypt or another ACME client:
 
 ## Usage
 
-Once configured, you can listen for `syslog_received` events:
+Once configured, you can listen for `syslog_receiver_message` events:
 
 - Listen for events `syslog_receiver_message` in automations:
 

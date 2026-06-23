@@ -57,4 +57,8 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         return True
 
     _LOGGER.debug("No migration needed for entry '%s'", entry.title)
-    return False
+    # No data change was required, but the entry is valid. Home Assistant treats a
+    # False return from async_migrate_entry as a migration FAILURE and aborts setup
+    # (the syslog server then never binds to the port). "No migration needed" is a
+    # success, so return True. See issue #5.
+    return True
